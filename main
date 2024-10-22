@@ -1,0 +1,157 @@
+#include <Arduino.h>
+
+#define BUTTON1 3
+#define BUTTON2 2
+
+#define LED_0 10
+#define LED_1 9
+#define LED_2 8
+#define LED_3 7
+
+#define RGB_R 6
+#define RGB_B 4
+#define RGB_Y 5
+
+
+int btn1sts =LOW;
+volatile int btn2sts =LOW;
+
+volatile int vai=0;
+volatile int incarca=0;
+
+int i=0;
+
+void pin_ISR();          // ISR pentru intrerupe
+void animatie_oprire();  // Funcție pentru animatie_oprire
+void palpal(int LED);    // Funcție pentru palparea LED-urilor
+
+
+void setup() 
+{
+  pinMode(BUTTON1, INPUT);
+  pinMode(BUTTON2, INPUT);
+
+  pinMode(LED_0, OUTPUT);
+  pinMode(LED_1, OUTPUT);
+  pinMode(LED_2, OUTPUT);
+  pinMode(LED_3, OUTPUT);
+
+  pinMode(RGB_R, OUTPUT);
+  pinMode(RGB_B, OUTPUT);
+  pinMode(RGB_Y, OUTPUT);
+
+  attachInterrupt(0, pin_ISR, RISING);
+
+    digitalWrite(RGB_R, LOW);
+    digitalWrite(RGB_B, LOW);
+    digitalWrite(RGB_Y, HIGH);
+
+}
+
+
+void loop()
+{
+
+     if((vai==1)&&(incarca==1))
+     {
+      animatie_oprire();
+      vai=0;
+      return;
+     }
+  
+  interrupts();
+
+  btn1sts = digitalRead(BUTTON1);
+    
+
+  if(btn1sts == HIGH)
+  { 
+
+    incarca=1;
+    digitalWrite(RGB_Y, LOW);
+     digitalWrite(RGB_R, HIGH);
+
+ 
+    palpal(LED_0);
+     if(vai==1)
+     return;
+    palpal(LED_1);
+     if(vai==1)
+     return;
+    palpal(LED_2);
+    if(vai==1)
+     return;
+    palpal(LED_3);
+
+    animatie_oprire();
+    vai=0;
+    incarca=0;
+  }
+  
+
+
+}
+  void palpal(int LED)
+  {
+
+    while(i<3)
+    {
+    digitalWrite(LED, HIGH);
+    delay(200);
+   
+    digitalWrite(LED, LOW);
+    delay(800);
+    i++;
+    }
+    
+    
+    i=0;
+    digitalWrite(LED, HIGH);
+    
+  }
+
+  void animatie_oprire()
+  { 
+    vai=0;
+    //
+ 
+  
+    while(i<3)
+    {
+
+    digitalWrite(LED_0, LOW);
+    digitalWrite(LED_1, LOW);
+    digitalWrite(LED_2, LOW);
+    digitalWrite(LED_3, LOW);
+    delay(500);
+
+    digitalWrite(LED_0, HIGH);
+    digitalWrite(LED_1, HIGH);
+    digitalWrite(LED_2, HIGH);
+    digitalWrite(LED_3, HIGH);
+    delay(500);
+
+    i++;
+
+    }
+
+    i=0;
+    digitalWrite(LED_0, LOW);
+    digitalWrite(LED_1, LOW);
+    digitalWrite(LED_2, LOW);
+    digitalWrite(LED_3, LOW);
+
+    
+    //
+    digitalWrite(RGB_Y, HIGH);
+     digitalWrite(RGB_R, LOW);
+
+      incarca=0;
+   
+  }
+  void pin_ISR()
+  {
+    vai=1;
+  }
+
+  
